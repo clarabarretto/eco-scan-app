@@ -2,41 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Design System - Waste Classification App (Apple Minimalist Style)
+All colors MUST be HSL for proper theming
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Base colors - Clean white foundation */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 12%;
 
+    /* Card and surface colors */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Action blue - Interactive elements */
+    --primary: 211 100% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Sustainable green - Environmental theme */
+    --secondary: 122 39% 49%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted tones for subtle elements */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent for highlights */
+    --accent: 122 20% 95%;
+    --accent-foreground: 122 39% 25%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Error states */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders and inputs - Ultra subtle */
+    --border: 0 0% 90%;
+    --input: 0 0% 95%;
+    --ring: 211 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Typography */
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    
+    /* Shadows for depth */
+    --shadow-subtle: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-elegant: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+
+    /* Gradients for modern appeal */
+    --gradient-subtle: linear-gradient(135deg, hsl(var(--background)), hsl(var(--accent)));
+    --gradient-success: linear-gradient(135deg, hsl(122 39% 95%), hsl(122 39% 90%));
 
     --sidebar-background: 0 0% 98%;
 
@@ -101,5 +121,51 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-main);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Upload Area Styles */
+  .upload-area {
+    @apply relative border-2 border-dashed border-border bg-card rounded-xl p-12 text-center transition-all duration-300 ease-out hover:border-primary/30 hover:bg-accent/30;
+    box-shadow: var(--shadow-subtle);
+  }
+  
+  .upload-area.drag-over {
+    @apply border-primary bg-primary/5 scale-[1.02];
+    box-shadow: var(--shadow-elegant);
+  }
+
+  /* Result Card Styles */
+  .result-card {
+    @apply bg-card rounded-xl p-8 text-center;
+    background: var(--gradient-success);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Button Variants */
+  .btn-upload {
+    @apply bg-primary text-primary-foreground px-8 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105 active:scale-95;
+    box-shadow: var(--shadow-subtle);
+  }
+  
+  .btn-classify {
+    @apply bg-secondary text-secondary-foreground px-10 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-105 active:scale-95;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Image Preview */
+  .image-preview {
+    @apply rounded-xl overflow-hidden;
+    box-shadow: var(--shadow-elegant);
+  }
+
+  /* Loading Animation */
+  .loading-spinner {
+    @apply animate-spin rounded-full h-6 w-6 border-2 border-muted border-t-primary;
   }
 }
