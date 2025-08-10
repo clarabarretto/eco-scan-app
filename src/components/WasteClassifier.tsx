@@ -2,6 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, Leaf, Recycle, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from "sonner";
+import wasteExamplesHero from '@/assets/waste-examples.jpg';
+import ImpactStats from './ImpactStats';
+import WasteExamples from './WasteExamples';
+import SustainabilityTips from './SustainabilityTips';
 
 interface ClassificationResult {
   category: string;
@@ -107,11 +111,20 @@ const WasteClassifier: React.FC = () => {
             </div>
             <h1 className="text-4xl font-bold text-foreground">EcoClassify</h1>
           </div>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
             Classificação inteligente de resíduos utilizando IA para promover 
             <span className="text-secondary font-medium"> sustentabilidade</span> e 
             gestão ambiental eficiente
           </p>
+          
+          {/* Hero Image */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <img
+              src={wasteExamplesHero}
+              alt="Exemplos de resíduos recicláveis organizados"
+              className="w-full h-64 object-cover rounded-2xl shadow-elegant"
+            />
+          </div>
         </header>
 
         {/* Main Content */}
@@ -235,9 +248,27 @@ const WasteClassifier: React.FC = () => {
           )}
         </div>
 
+        {/* Educational Sections */}
+        <div className="space-y-12 mt-16">
+          {/* Impact Statistics */}
+          <ImpactStats />
+          
+          {/* Waste Classification Examples */}
+          <WasteExamples />
+          
+          {/* Sustainability Tips */}
+          <SustainabilityTips />
+        </div>
+
         {/* Footer */}
-        <footer className="text-center mt-16 text-sm text-muted-foreground">
-          <p>Tecnologia de IA para gestão ambiental responsável</p>
+        <footer className="text-center mt-16 space-y-4">
+          <div className="flex items-center justify-center gap-2 text-secondary">
+            <Leaf className="h-5 w-5" />
+            <span className="font-medium">Tecnologia de IA para gestão ambiental responsável</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Desenvolvido com 💚 para um futuro mais sustentável
+          </p>
         </footer>
       </div>
     </div>
