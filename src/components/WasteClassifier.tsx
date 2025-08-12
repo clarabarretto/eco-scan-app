@@ -92,6 +92,9 @@ const WasteClassifier: React.FC = () => {
       };
       
       setResult(mockResult);
+      
+      // Save to history and update points
+      saveClassificationToHistory(mockResult);
       toast.success("Classificação realizada com sucesso!");
       
     } catch (error) {
@@ -100,6 +103,26 @@ const WasteClassifier: React.FC = () => {
     } finally {
       setIsClassifying(false);
     }
+  };
+
+  const saveClassificationToHistory = (result: ClassificationResult) => {
+    const historyItem = {
+      id: Date.now().toString(),
+      category: result.category,
+      confidence: result.confidence,
+      timestamp: new Date(),
+      points: Math.round(result.confidence * 100) // Points based on confidence
+    };
+    
+    // Save to localStorage
+    const existingHistory = JSON.parse(localStorage.getItem('classification-history') || '[]');
+    const updatedHistory = [historyItem, ...existingHistory];
+    localStorage.setItem('classification-history', JSON.stringify(updatedHistory));
+    
+    // Update total points
+    const currentPoints = parseInt(localStorage.getItem('eco-points') || '0');
+    const newTotalPoints = currentPoints + historyItem.points;
+    localStorage.setItem('eco-points', newTotalPoints.toString());
   };
 
   const resetClassifier = () => {
