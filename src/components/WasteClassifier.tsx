@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, Leaf, Recycle, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Upload, Leaf, Recycle, AlertCircle, CheckCircle2, Camera, X } from 'lucide-react';
 import { toast } from "sonner";
-import wasteExamplesHero from '@/assets/waste-examples.jpg';
+import wasteExamplesHero from '@/assets/interactive-waste-collection.jpg';
 import ImpactStats from './ImpactStats';
 import WasteExamples from './WasteExamples';
 import SustainabilityTips from './SustainabilityTips';
@@ -10,6 +10,8 @@ import SustainabilityTips from './SustainabilityTips';
 interface ClassificationResult {
   category: string;
   confidence: number;
+  tips: string;
+  icon: string;
 }
 
 const WasteClassifier: React.FC = () => {
@@ -77,10 +79,16 @@ const WasteClassifier: React.FC = () => {
 
       const data = await response.json();
       
-      // Para demonstração, vamos simular uma resposta
+      // Enhanced mock results with tips and icons
+      const categories = Object.keys(wasteCategories);
+      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+      const categoryData = wasteCategories[randomCategory as keyof typeof wasteCategories];
+      
       const mockResult = {
-        category: Object.keys(wasteCategories)[Math.floor(Math.random() * Object.keys(wasteCategories).length)],
-        confidence: Math.random() * 0.3 + 0.7 // 70-100%
+        category: categoryData.name,
+        confidence: Math.random() * 0.3 + 0.7, // 70-100%
+        tips: `${categoryData.name} detectado! Certifique-se de separar corretamente para reciclagem.`,
+        icon: categoryData.icon
       };
       
       setResult(mockResult);
@@ -129,123 +137,173 @@ const WasteClassifier: React.FC = () => {
 
         {/* Main Content */}
         <div className="space-y-8">
-          {/* Upload Area */}
+          {/* Interactive Upload Area */}
           {!imagePreview && (
             <div
               {...getRootProps()}
-              className={`upload-area cursor-pointer ${isDragActive ? 'drag-over' : ''}`}
+              className={`group relative border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-500 ${
+                isDragActive 
+                  ? 'border-secondary bg-gradient-to-br from-secondary/10 to-primary/10 scale-105 shadow-lg' 
+                  : 'border-border bg-card hover:border-secondary hover:bg-gradient-to-br hover:from-secondary/5 hover:to-primary/5 hover:scale-105 hover:shadow-md'
+              }`}
             >
               <input {...getInputProps()} />
-              <div className="space-y-6">
-                <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto">
-                  <Upload className="h-8 w-8 text-primary" />
+              
+              {/* Animated background pattern */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500">
+                <div className="absolute inset-0 bg-gradient-to-br from-secondary via-primary to-secondary animate-pulse"></div>
+              </div>
+              
+              <div className="relative space-y-6">
+                <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br from-secondary/20 to-primary/20 transition-transform duration-300 ${isDragActive ? 'scale-110 rotate-6' : 'group-hover:scale-110'}`}>
+                  <Camera className={`h-8 w-8 text-secondary transition-all duration-300 ${isDragActive ? 'animate-bounce' : ''}`} />
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">
-                    {isDragActive ? 'Solte a imagem aqui' : 'Carregar Imagem'}
+                
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold text-foreground transition-all duration-300 group-hover:text-secondary">
+                    {isDragActive ? '📸 Solte a imagem aqui!' : '🎯 Classificação Inteligente de Resíduos'}
                   </h3>
-                  <p className="text-muted-foreground mb-6">
-                    Arraste e solte uma imagem ou clique para selecionar
+                  <p className="text-muted-foreground transition-all duration-300 group-hover:text-foreground/80">
+                    {isDragActive 
+                      ? 'Pronto para analisar seu resíduo!' 
+                      : 'Arraste uma imagem ou clique para descobrir como reciclar corretamente'
+                    }
                   </p>
-                  <button className="btn-upload">
-                    Selecionar Imagem
-                  </button>
+                  
+                  {!isDragActive && (
+                    <div className="flex items-center justify-center gap-2 mt-4 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                      <span className="text-xs bg-secondary/10 px-3 py-1 rounded-full">PNG</span>
+                      <span className="text-xs bg-secondary/10 px-3 py-1 rounded-full">JPG</span>
+                      <span className="text-xs bg-secondary/10 px-3 py-1 rounded-full">até 10MB</span>
+                    </div>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Formatos suportados: JPG, PNG, WebP • Máximo 10MB
-                </p>
               </div>
             </div>
           )}
 
-          {/* Image Preview and Classification */}
+          {/* Enhanced Image Preview and Classification */}
           {imagePreview && (
-            <div className="space-y-8">
-              <div className="bg-card rounded-2xl p-8 shadow-card">
-                <div className="text-center space-y-6">
-                  <div className="image-preview max-w-md mx-auto">
-                    <img
-                      src={imagePreview}
-                      alt="Imagem para classificação"
-                      className="w-full h-auto max-h-96 object-contain"
-                    />
-                  </div>
+            <div className="space-y-6 animate-fade-in">
+              <div className="relative group">
+                <div className="relative overflow-hidden rounded-xl shadow-card">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                   
-                  <div className="flex gap-4 justify-center">
-                    <button
-                      onClick={classifyImage}
-                      disabled={isClassifying}
-                      className="btn-classify disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isClassifying ? (
-                        <div className="flex items-center gap-3">
-                          <div className="loading-spinner" />
-                          Classificando...
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3">
-                          <Leaf className="h-5 w-5" />
-                          Classificar Resíduo
-                        </div>
-                      )}
-                    </button>
-                    
+                  {/* Interactive overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  {/* Floating action button */}
+                  <div className="absolute top-4 right-4">
                     <button
                       onClick={resetClassifier}
-                      className="px-6 py-3 text-muted-foreground hover:text-foreground transition-colors"
+                      className="bg-background/90 backdrop-blur-md hover:bg-background shadow-lg transition-all duration-300 hover:scale-110 p-2 rounded-full"
                     >
-                      Nova Imagem
+                      <X className="h-4 w-4" />
                     </button>
+                  </div>
+                  
+                  {/* Image info overlay */}
+                  <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="bg-background/90 backdrop-blur-md rounded-lg px-3 py-2">
+                      <p className="text-xs text-muted-foreground">Pronto para análise</p>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Classification Result */}
-              {result && (
-                <div className="result-card animate-fade-in">
-                  <div className="space-y-6">
-                    <div className="bg-secondary/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto">
-                      <CheckCircle2 className="h-8 w-8 text-secondary" />
+              
+              {/* Interactive classification button */}
+              <div className="relative">
+                <button
+                  onClick={classifyImage}
+                  disabled={isClassifying}
+                  className="w-full h-14 text-lg font-medium bg-gradient-to-r from-secondary via-primary to-secondary transition-all duration-500 hover:scale-105 hover:shadow-lg disabled:hover:scale-100 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isClassifying ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="relative">
+                        <div className="animate-spin rounded-full h-6 w-6 border-3 border-background border-t-transparent" />
+                        <div className="absolute inset-0 animate-ping rounded-full h-6 w-6 border border-background/50" />
+                      </div>
+                      <span className="animate-pulse">🤖 Analisando com IA...</span>
                     </div>
-                    
-                    <div>
-                      <h3 className="text-2xl font-bold text-foreground mb-3">
-                        Classificação Concluída
-                      </h3>
-                      
-                      <div className="bg-white/50 rounded-xl p-6 backdrop-blur-sm">
-                        <div className="flex items-center justify-center gap-4 mb-4">
-                          <span className="text-4xl">
-                            {wasteCategories[result.category as keyof typeof wasteCategories]?.icon}
-                          </span>
-                          <div className="text-left">
-                            <p className="text-3xl font-bold text-foreground">
-                              {wasteCategories[result.category as keyof typeof wasteCategories]?.name || result.category}
-                            </p>
-                            <p className="text-muted-foreground">
-                              Confiança: {(result.confidence * 100).toFixed(1)}%
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="w-full bg-muted rounded-full h-2">
-                          <div
-                            className="bg-secondary h-2 rounded-full transition-all duration-1000 ease-out"
-                            style={{ width: `${result.confidence * 100}%` }}
-                          />
-                        </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-3">
+                      <Recycle className="h-6 w-6 transition-transform duration-300 group-hover:rotate-180" />
+                      <span>✨ Classificar com Inteligência Artificial</span>
+                    </div>
+                  )}
+                </button>
+                
+                {/* Progress indicator for classification */}
+                {isClassifying && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-background/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-secondary to-primary animate-[progress_2s_ease-in-out]" />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Enhanced Classification Result */}
+          {result && (
+                <div className="bg-card rounded-2xl p-8 shadow-card animate-fade-in border border-secondary/20">
+                  <div className="text-center space-y-6">
+                    {/* Animated success icon */}
+                    <div className="relative">
+                      <div className="inline-flex p-4 rounded-xl bg-gradient-to-br from-secondary/20 to-primary/20 animate-scale-in">
+                        <CheckCircle2 className="h-8 w-8 text-secondary animate-bounce" />
+                      </div>
+                      <div className="absolute inset-0 inline-flex p-4 rounded-xl animate-ping">
+                        <div className="h-8 w-8 bg-secondary/30 rounded-full" />
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center">
-                      <Leaf className="h-4 w-4 text-secondary" />
-                      <span>Contribuindo para um futuro mais sustentável</span>
+                    {/* Result display with icon */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center gap-3">
+                        <span className="text-4xl animate-bounce">{result.icon}</span>
+                        <h3 className="text-3xl font-bold text-foreground">
+                          {result.category}
+                        </h3>
+                      </div>
+                      
+                      {/* Interactive confidence meter */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Confiança da IA:</span>
+                          <span className="text-lg font-bold text-secondary">
+                            {(result.confidence * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                        
+                        <div className="relative w-full bg-muted rounded-full h-4 overflow-hidden shadow-inner">
+                          <div 
+                            className="h-full bg-gradient-to-r from-secondary via-primary to-secondary transition-all duration-2000 ease-out rounded-full relative"
+                            style={{ width: `${result.confidence * 100}%` }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[slide_2s_ease-in-out_infinite]" />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Interactive tip card */}
+                      <div className="mt-6 p-4 bg-gradient-to-r from-secondary/10 to-primary/10 rounded-xl border border-secondary/20 hover:border-secondary/40 transition-all duration-300 hover:scale-105">
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl">💡</span>
+                          <div>
+                            <h4 className="font-semibold text-foreground mb-1">Dica de Reciclagem:</h4>
+                            <p className="text-sm text-muted-foreground">{result.tips}</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
-            </div>
-          )}
         </div>
 
         {/* Educational Sections */}

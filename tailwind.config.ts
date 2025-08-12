@@ -110,10 +110,15 @@ export default {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.5s ease-out',
-				'scale-in': 'scale-in 0.3s ease-out'
+				'scale-in': 'scale-in 0.3s ease-out',
+				'shimmer': 'shimmer 2s ease-in-out infinite',
+				'progress': 'progress 2s ease-in-out'
 			},
 			fontFamily: {
 				sans: ['Inter', 'system-ui', 'sans-serif']
+			},
+			borderWidth: {
+				'3': '3px'
 			}
 		}
 	},
