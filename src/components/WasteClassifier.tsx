@@ -58,6 +58,30 @@ const WasteClassifier: React.FC = () => {
     multiple: false
   });
 
+  // Mapping API categories to Portuguese
+  const categoryMapping = {
+    'cardboard': 'papelao',
+    'glass': 'vidro',
+    'metal': 'metal',
+    'paper': 'papel',
+    'plastic': 'plastico',
+    'trash': 'organico'
+  };
+
+  const convertImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        // Remove the data:image/...;base64, prefix
+        const base64Data = base64.split(',')[1];
+        resolve(base64Data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const classifyImage = async () => {
     if (!selectedImage) {
       toast.error("Por favor, selecione uma imagem primeiro.");
@@ -67,13 +91,18 @@ const WasteClassifier: React.FC = () => {
     setIsClassifying(true);
     
     try {
-      const formData = new FormData();
-      formData.append('image', selectedImage);
+      // Convert image to base64
+      const base64Image = await convertImageToBase64(selectedImage);
 
-      // Simulação da API call - substitua pela URL real do seu backend
-      const response = await fetch('/api/classify', {
+      // Send request to the real API
+      const response = await fetch('https://ecoclassify-api.onrender.com/predict', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image_data: base64Image
+        }),
       });
 
       if (!response.ok) {
@@ -82,44 +111,32 @@ const WasteClassifier: React.FC = () => {
 
       const data = await response.json();
       
-      // Enhanced mock results with tips and icons
-      const categories = Object.keys(wasteCategories);
-      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-      const categoryData = wasteCategories[randomCategory as keyof typeof wasteCategories];
+      // Map API response to our format
+      const apiCategory = data.predicted_class;
+      const mappedCategory = categoryMapping[apiCategory as keyof typeof categoryMapping];
+      const categoryData = wasteCategories[mappedCategory as keyof typeof wasteCategories];
       
-      // Generate mock predictions for all categories
+      // Map all predictions to Portuguese categories
       const allPredictions: { [key: string]: number } = {};
-      const mainConfidence = Math.random() * 0.3 + 0.7; // 70-100%
-      let remainingConfidence = 1 - mainConfidence;
-      
-      // Set main category confidence
-      allPredictions[randomCategory] = mainConfidence;
-      
-      // Distribute remaining confidence among other categories
-      const otherCategories = categories.filter(cat => cat !== randomCategory);
-      otherCategories.forEach((cat, index) => {
-        if (index === otherCategories.length - 1) {
-          // Last category gets remaining confidence
-          allPredictions[cat] = remainingConfidence;
-        } else {
-          const categoryConfidence = Math.random() * remainingConfidence * 0.6;
-          allPredictions[cat] = categoryConfidence;
-          remainingConfidence -= categoryConfidence;
+      Object.entries(data.all_predictions).forEach(([englishCategory, confidence]) => {
+        const portugueseCategory = categoryMapping[englishCategory as keyof typeof categoryMapping];
+        if (portugueseCategory) {
+          allPredictions[portugueseCategory] = confidence as number;
         }
       });
       
-      const mockResult = {
+      const result = {
         category: categoryData.name,
-        confidence: mainConfidence,
+        confidence: data.confidence,
         tips: `${categoryData.name} detectado! Certifique-se de separar corretamente para reciclagem.`,
         icon: categoryData.icon,
         allPredictions
       };
       
-      setResult(mockResult);
+      setResult(result);
       
       // Save to history and update points
-      saveClassificationToHistory(mockResult);
+      saveClassificationToHistory(result);
       toast.success("Classificação realizada com sucesso!");
       
     } catch (error) {
