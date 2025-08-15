@@ -313,24 +313,19 @@ const WasteClassifier: React.FC = () => {
             </div>
           )}
 
-          {/* Enhanced Classification Result */}
+          {/* Classification Result */}
           {result && (
-                <div className="bg-card rounded-2xl p-8 shadow-card animate-fade-in border border-secondary/20">
+                <div className="bg-card rounded-2xl p-8 shadow-card border border-secondary/20">
                   <div className="text-center space-y-6">
-                    {/* Animated success icon */}
-                    <div className="relative">
-                      <div className="inline-flex p-4 rounded-xl bg-gradient-to-br from-secondary/20 to-primary/20 animate-scale-in">
-                        <CheckCircle2 className="h-8 w-8 text-secondary animate-bounce" />
-                      </div>
-                      <div className="absolute inset-0 inline-flex p-4 rounded-xl animate-ping">
-                        <div className="h-8 w-8 bg-secondary/30 rounded-full" />
-                      </div>
+                    {/* Success icon */}
+                    <div className="inline-flex p-4 rounded-xl bg-gradient-to-br from-secondary/20 to-primary/20">
+                      <CheckCircle2 className="h-8 w-8 text-secondary" />
                     </div>
                     
                     {/* Result display with icon */}
                     <div className="space-y-4">
                       <div className="flex items-center justify-center gap-3">
-                        <span className="text-4xl animate-bounce">{result.icon}</span>
+                        <span className="text-4xl">{result.icon}</span>
                         <h3 className="text-3xl font-bold text-foreground">
                           {result.category}
                         </h3>
