@@ -12,6 +12,9 @@ interface ClassificationResult {
   confidence: number;
   tips: string;
   icon: string;
+  allPredictions: {
+    [key: string]: number;
+  };
 }
 
 const WasteClassifier: React.FC = () => {
@@ -84,11 +87,33 @@ const WasteClassifier: React.FC = () => {
       const randomCategory = categories[Math.floor(Math.random() * categories.length)];
       const categoryData = wasteCategories[randomCategory as keyof typeof wasteCategories];
       
+      // Generate mock predictions for all categories
+      const allPredictions: { [key: string]: number } = {};
+      const mainConfidence = Math.random() * 0.3 + 0.7; // 70-100%
+      let remainingConfidence = 1 - mainConfidence;
+      
+      // Set main category confidence
+      allPredictions[randomCategory] = mainConfidence;
+      
+      // Distribute remaining confidence among other categories
+      const otherCategories = categories.filter(cat => cat !== randomCategory);
+      otherCategories.forEach((cat, index) => {
+        if (index === otherCategories.length - 1) {
+          // Last category gets remaining confidence
+          allPredictions[cat] = remainingConfidence;
+        } else {
+          const categoryConfidence = Math.random() * remainingConfidence * 0.6;
+          allPredictions[cat] = categoryConfidence;
+          remainingConfidence -= categoryConfidence;
+        }
+      });
+      
       const mockResult = {
         category: categoryData.name,
-        confidence: Math.random() * 0.3 + 0.7, // 70-100%
+        confidence: mainConfidence,
         tips: `${categoryData.name} detectado! Certifique-se de separar corretamente para reciclagem.`,
-        icon: categoryData.icon
+        icon: categoryData.icon,
+        allPredictions
       };
       
       setResult(mockResult);
@@ -313,6 +338,46 @@ const WasteClassifier: React.FC = () => {
                         </div>
                       </div>
                       
+                      {/* All Predictions Section */}
+                      <div className="mt-6 p-6 bg-card border border-secondary/20 rounded-xl">
+                        <h4 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                          📊 Todas as Previsões:
+                        </h4>
+                        <div className="space-y-3">
+                          {Object.entries(result.allPredictions)
+                            .sort(([,a], [,b]) => b - a)
+                            .map(([category, confidence]) => {
+                              const categoryData = wasteCategories[category as keyof typeof wasteCategories];
+                              const percentage = (confidence * 100).toFixed(2);
+                              return (
+                                <div key={category} className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-lg">{categoryData.icon}</span>
+                                    <span className={`font-medium ${categoryData.color}`}>
+                                      {categoryData.name}:
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-20 bg-muted rounded-full h-2">
+                                      <div 
+                                        className={`h-full rounded-full transition-all duration-1000 ${
+                                          category === Object.entries(result.allPredictions).sort(([,a], [,b]) => b - a)[0][0]
+                                            ? 'bg-gradient-to-r from-secondary to-primary'
+                                            : 'bg-muted-foreground/30'
+                                        }`}
+                                        style={{ width: `${confidence * 100}%` }}
+                                      />
+                                    </div>
+                                    <span className="text-sm font-mono min-w-[50px] text-right">
+                                      {percentage}%
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+
                       {/* Interactive tip card */}
                       <div className="mt-6 p-4 bg-gradient-to-r from-secondary/10 to-primary/10 rounded-xl border border-secondary/20 hover:border-secondary/40 transition-all duration-300 hover:scale-105">
                         <div className="flex items-start gap-3">
